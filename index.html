@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetFun - Skapa Egna Bets</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .balance {
+            background: #ffd700;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #1e3c72;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab.active {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .create-bet-form {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #1e3c72;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .time-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .time-btn:hover {
+            background: #e8f4ff;
+        }
+
+        .time-btn.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .option-input {
+            flex: 1;
+        }
+
+        .remove-option-btn {
+            padding: 10px 15px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .remove-option-btn:hover {
+            background: #da190b;
+        }
+
+        .add-option-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .add-option-btn:hover {
+            background: #0b7dda;
+        }
+
+        .bet-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .bet-option {
+            background: #e3f2fd;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #1976d2;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .bets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .bet-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .bet-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .bet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .bet-title {
+            font-size: 1.3em;
+            color: #1e3c72;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .bet-timer {
+            background: #ff9800;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .bet-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .bet-prize {
+            background: #ffd700;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #1e3c72;
+            text-align: center;
+        }
+
+        .bet-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bet-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .accept-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .accept-btn:hover {
+            background: #45a049;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #da190b;
+        }
+
+        .no-bets {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .message.success {
+            background: #4CAF50;
+        }
+
+        .message.error {
+            background: #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .bet-creator {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .accepted-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎲 BetFun</h1>
+            <div class="balance">💰 <span id="balance">1000</span> poäng</div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('create')">Skapa Bet</button>
+            <button class="tab" onclick="switchTab('active')">Aktiva Bets</button>
+            <button class="tab" onclick="switchTab('mine')">Mina Bets</button>
+        </div>
+
+        <div id="create-tab" class="tab-content active">
+            <div class="create-bet-form">
+                <h2 style="color: #1e3c72; margin-bottom: 25px;">🎯 Skapa Ett Nytt Bet</h2>
+                
+                <div class="form-group">
+                    <label>Bet Titel</label>
+                    <input type="text" id="bet-title" placeholder="T.ex. 'Vem vinner nästa match?'">
+                </div>
+
+                <div class="form-group">
+                    <label>Beskrivning</label>
+                    <textarea id="bet-description" placeholder="Beskriv ditt bet i detalj..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Alternativ att betta på</label>
+                    <div id="options-container"></div>
+                    <button type="button" class="add-option-btn" onclick="addOption()">+ Lägg till alternativ</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Pris (frivilligt)</label>
+                    <input type="text" id="bet-prize" placeholder="T.ex. 'En glass', '500 poäng', 'Middag'">
+                </div>
+
+                <div class="form-group">
+                    <label>Tid/Datum</label>
+                    <div class="time-options">
+                        <div class="time-btn" onclick="selectTime('6h')">6 timmar</div>
+                        <div class="time-btn" onclick="selectTime('12h')">12 timmar</div>
+                        <div class="time-btn" onclick="selectTime('24h')">24 timmar</div>
+                        <div class="time-btn" onclick="selectTime('48h')">48 timmar</div>
+                    </div>
+                    <input type="datetime-local" id="custom-date" style="margin-top: 10px;">
+                </div>
+
+                <button class="submit-btn" onclick="createBet()">📤 Publicera Bet</button>
+            </div>
+        </div>
+
+        <div id="active-tab" class="tab-content">
+            <div id="active-bets" class="bets-grid"></div>
+        </div>
+
+        <div id="mine-tab" class="tab-content">
+            <div id="my-bets" class="bets-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let bets = [];
+        let selectedTimeOption = null;
+        let optionCounter = 0;
+
+        // Lägg till två alternativ som standard
+        window.onload = function() {
+            addOption();
+            addOption();
+            renderBets();
+        };
+
+        function addOption() {
+            optionCounter++;
+            const container = document.getElementById('options-container');
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option-input-group';
+            optionDiv.id = `option-${optionCounter}`;
+            optionDiv.innerHTML = `
+                <input type="text" class="option-input" placeholder="T.ex. 'Liverpool', 'Ja', 'Alternative 1'" data-option-id="${optionCounter}">
+                <button type="button" class="remove-option-btn" onclick="removeOption(${optionCounter})">×</button>
+            `;
+            container.appendChild(optionDiv);
+        }
+
+        function removeOption(id) {
+            const element = document.getElementById(`option-${id}`);
+            if (element) {
+                element.remove();
+            }
+        }
+
+        function getOptions() {
+            const inputs = document.querySelectorAll('.option-input');
+            const options = [];
+            inputs.forEach(input => {
+                if (input.value.trim()) {
+                    options.push(input.value.trim());
+                }
+            });
+            return options;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            
+            renderBets();
+        }
+
+        function selectTime(option) {
+            selectedTimeOption = option;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            document.getElementById('custom-date').value = '';
+        }
+
+        function createBet() {
+            const title = document.getElementById('bet-title').value;
+            const description = document.getElementById('bet-description').value;
+            const prize = document.getElementById('bet-prize').value;
+            const customDate = document.getElementById('custom-date').value;
+            const options = getOptions();
+
+            if (!title || !description) {
+                showMessage('Fyll i titel och beskrivning!', 'error');
+                return;
+            }
+
+            if (options.length < 2) {
+                showMessage('Lägg till minst 2 alternativ att betta på!', 'error');
+                return;
+            }
+
+            let endTime;
+            if (customDate) {
+                endTime = new Date(customDate);
+            } else if (selectedTimeOption) {
+                endTime = new Date();
+                const hours = parseInt(selectedTimeOption);
+                endTime.setHours(endTime.getHours() + hours);
+            } else {
+                showMessage('Välj en tid eller datum!', 'error');
+                return;
+            }
+
+            if (endTime <= new Date()) {
+                showMessage('Datumet måste vara i framtiden!', 'error');
+                return;
+            }
+
+            const bet = {
+                id: Date.now(),
+                title,
+                description,
+                prize: prize || 'Poäng',
+                options,
+                endTime: endTime.getTime(),
+                creator: 'Du',
+                accepted: false,
+                acceptedBy: null
+            };
+
+            bets.push(bet);
+            
+            // Rensa formuläret
+            document.getElementById('bet-title').value = '';
+            document.getElementById('bet-description').value = '';
+            document.getElementById('bet-prize').value = '';
+            document.getElementById('custom-date').value = '';
+            document.getElementById('options-container').innerHTML = '';
+            selectedTimeOption = null;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Lägg till två nya alternativ
+            optionCounter = 0;
+            addOption();
+            addOption();
+
+            showMessage('Bet publicerat! 🎉', 'success');
+            renderBets();
+        }
+
+        function acceptBet(betId) {
+            const bet = bets.find(b => b.id === betId);
+            if (bet) {
+                bet.accepted = true;
+                bet.acceptedBy = 'Dig';
+                showMessage('Du har accepterat bettet!', 'success');
+                renderBets();
+            }
+        }
+
+        function deleteBet(betId) {
+            const index = bets.findIndex(b => b.id === betId);
+            if (index !== -1) {
+                bets.splice(index, 1);
+                showMessage('Bet borttaget', 'success');
+                renderBets();
+            }
+        }
+
+        function getTimeRemaining(endTime) {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                return 'Utgången';
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+            if (days > 0) return `${days}d ${hours}h`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
+
+        function renderBets() {
+            const activeContainer = document.getElementById('active-bets');
+            const myContainer = document.getElementById('my-bets');
+
+            // Filtrera aktiva bets (inte skapade av dig och inte utgångna)
+            const activeBets = bets.filter(b => b.creator !== 'Du' && b.endTime > Date.now());
+            
+            // Filtrera dina bets
+            const myBets = bets.filter(b => b.creator === 'Du');
+
+            if (activeBets.length === 0) {
+                activeContainer.innerHTML = '<div class="no-bets">Inga aktiva bets just nu 🎲</div>';
+            } else {
+                activeContainer.innerHTML = activeBets.map(bet => `
+                    <div class="bet-card">
+                        <div class="bet-header">
+                            <div class="bet-title">${bet.title}</div>
+                            <div class="bet-timer">⏰ ${getTimeRemaining(bet.endTime)}</div>
+                        </div>
+                        <div class="bet-description">${bet.description}</div>
+                        <div class="bet-options">
+                            ${bet.options.map(opt => `<span class="bet-option">${opt}</span>`).join('')}
+                        </div>
+                        <div class="bet-prize">🏆 Pris: ${bet.prize}</div>
+                        <div class="bet-actions">
+                            <button class="bet-btn accept-btn" onclick="acceptBet(${bet.id})">Acceptera Bet</button>
+                        </div>
+                        <div class="bet-creator">Skapad av: ${bet.creator}</div>
+                    </div>
+                `).join('');
+            }
+
+            if (myBets.length === 0) {
+                myContainer.innerHTML = '<div class="no-bets">Du har inga bets ännu 🎯</div>';
+            } else {
+                myContainer.innerHTML = myBets.map(bet => `
+                    <div class="bet-card">
+                        <div class="bet-header">
+                            <div class="bet-title">${bet.title}</div>
+                            <div class="bet-timer">⏰ ${getTimeRemaining(bet.endTime)}</div>
+                        </div>
+                        <div class="bet-description">${bet.description}</div>
+                        <div class="bet-options">
+                            ${bet.options.map(opt => `<span class="bet-option">${opt}</span>`).join('')}
+                        </div>
+                        <div class="bet-prize">🏆 Pris: ${bet.prize}</div>
+                        ${bet.accepted ? `<div class="accepted-badge">✅ Accepterat av ${bet.acceptedBy}</div>` : ''}
+                        <div class="bet-actions">
+                            ${bet.endTime > Date.now() ? `<button class="bet-btn delete-btn" onclick="deleteBet(${bet.id})">Ta Bort</button>` : '<button class="bet-btn" disabled>Utgången</button>'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        // Uppdatera timers varje minut
+        setInterval(() => {
+            renderBets();
+        }, 60000);
+    </script>
+</body>
+</html>
